@@ -10,14 +10,16 @@ import Link from 'next/link'
 export function TopBar() {
   const { data, syncing, error, refresh, user } = useStore()
   const [now, setNow] = useState(new Date())
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const t = setInterval(() => setNow(new Date()), 60_000)
     return () => clearInterval(t)
   }, [])
 
-  const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-  const dateStr = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })
+  const timeStr = mounted ? now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : ''
+  const dateStr = mounted ? now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
 
   const displayName = user?.displayName || data.settings.name || user?.email?.split('@')[0] || 'there'
 

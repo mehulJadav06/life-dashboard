@@ -23,18 +23,20 @@ const priorityColor: Record<Priority, string> = {
 // ── Live Clock ─────────────────────────────────────────────────────────────
 function LiveClock() {
   const [now, setNow] = useState(new Date())
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const t = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
 
-  const time = now.toLocaleTimeString('en-IN', {
+  const time = mounted ? now.toLocaleTimeString('en-IN', {
     hour: '2-digit', minute: '2-digit', second: '2-digit',
-  })
-  const date = now.toLocaleDateString('en-IN', {
+  }) : '--:--:-- --'
+  const date = mounted ? now.toLocaleDateString('en-IN', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  })
+  }) : ''
 
   return (
     <div className="text-center py-2">

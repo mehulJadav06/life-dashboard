@@ -30,7 +30,7 @@ export function TopBar() {
       {/* Greeting */}
       <div>
         <p className="text-white font-semibold text-sm leading-none">
-          {getGreeting()}, {displayName} 👋
+          {mounted ? getGreeting() : 'Welcome'}, {displayName} 👋
         </p>
         <p className="text-gray-500 text-xs mt-1">{dateStr}</p>
       </div>

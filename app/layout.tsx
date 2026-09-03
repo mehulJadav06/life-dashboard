@@ -3,7 +3,7 @@ import './globals.css'
 import { StoreProvider } from '@/lib/store'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
-import { GistSetupGate } from '@/components/ui/GistSetupGate'
+import { AuthGate } from '@/components/ui/AuthGate'
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +22,6 @@ export const viewport: Viewport = {
   themeColor: '#0f1117',
 }
 
-
 export default function RootLayout({
   children,
 }: {
@@ -32,10 +31,10 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body>
         <StoreProvider>
-          {/* First-run gate: shows GistSetup modal if not configured */}
-          <GistSetupGate />
+          {/* Auth gate: shows login screen if not signed in */}
+          <AuthGate />
 
-          {/* Shell */}
+          {/* App shell */}
           <Sidebar />
 
           <div className="flex flex-col min-h-screen" style={{ marginLeft: 'var(--sidebar-width, 240px)' }}>

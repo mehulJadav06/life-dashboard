@@ -9,28 +9,29 @@ import React, {
   ReactNode,
 } from 'react'
 import { AppData, DEFAULT_DATA } from './types'
-import { readGist, writeGist, getCredentials, hasCredentials } from './gist'
+import { loadUserData, saveUserData } from './firestore'
+import { onAuth, User } from './auth'
 
 // ── Context types ─────────────────────────────────────────────────────────
 
 interface StoreState {
-  data: AppData
+  data:    AppData
   loading: boolean
   syncing: boolean
-  error: string | null
-  isSetup: boolean
+  error:   string | null
+  user:    User | null
   refresh: () => Promise<void>
-  update: (partial: Partial<AppData>) => Promise<void>
+  update:  (partial: Partial<AppData>) => Promise<void>
 }
 
 const StoreContext = createContext<StoreState>({
-  data:     DEFAULT_DATA,
-  loading:  true,
-  syncing:  false,
-  error:    null,
-  isSetup:  false,
-  refresh:  async () => {},
-  update:   async () => {},
+  data:    DEFAULT_DATA,
+  loading: true,
+  syncing: false,
+  error:   null,
+  user:    null,
+  refresh: async () => {},
+  update:  async () => {},
 })
 
 // ── Provider ──────────────────────────────────────────────────────────────
@@ -40,67 +41,57 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
-  const [isSetup, setIsSetup] = useState(false)
+  const [user,    setUser]    = useState<User | null>(null)
 
-  const refresh = useCallback(async () => {
-    if (!hasCredentials()) {
-      setIsSetup(false)
-      setLoading(false)
-      return
-    }
+  const refresh = useCallback(async (uid?: string) => {
+    const id = uid ?? user?.uid
+    if (!id) return
 
-    const creds = getCredentials()!
     setLoading(true)
     setError(null)
-
     try {
-      const raw = await readGist(creds)
-
-      setData({
-        todos:        (raw['todos.json']        as AppData['todos'])        ?? DEFAULT_DATA.todos,
-        transactions: (raw['transactions.json'] as AppData['transactions']) ?? DEFAULT_DATA.transactions,
-        links:        (raw['links.json']        as AppData['links'])        ?? DEFAULT_DATA.links,
-        notes:        (raw['notes.json']        as AppData['notes'])        ?? DEFAULT_DATA.notes,
-        settings:     (raw['settings.json']     as AppData['settings'])     ?? DEFAULT_DATA.settings,
-      })
-
-      setIsSetup(true)
+      const loaded = await loadUserData(id)
+      setData(loaded)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [user])
 
   const update = useCallback(async (partial: Partial<AppData>) => {
-    const creds = getCredentials()
-    if (!creds) return
+    if (!user) return
 
     const next = { ...data, ...partial }
-    setData(next)   // optimistic update
+    setData(next)       // optimistic update
     setSyncing(true)
 
     try {
-      const gistUpdate: Record<string, unknown> = {}
-      for (const key of Object.keys(partial) as Array<keyof AppData>) {
-        gistUpdate[`${key}.json`] = next[key]
-      }
-      await writeGist(creds, gistUpdate)
+      await saveUserData(user.uid, partial)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sync error')
-      // revert on failure
-      setData(data)
+      setData(data)     // revert on failure
     } finally {
       setSyncing(false)
     }
-  }, [data])
+  }, [data, user])
 
+  // Listen to Firebase auth state
   useEffect(() => {
-    refresh()
-  }, [refresh])
+    const unsub = onAuth(async (firebaseUser) => {
+      setUser(firebaseUser)
+      if (firebaseUser) {
+        await refresh(firebaseUser.uid)
+      } else {
+        setData(DEFAULT_DATA)
+        setLoading(false)
+      }
+    })
+    return unsub
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <StoreContext.Provider value={{ data, loading, syncing, error, isSetup, refresh, update }}>
+    <StoreContext.Provider value={{ data, loading, syncing, error, user, refresh, update }}>
       {children}
     </StoreContext.Provider>
   )

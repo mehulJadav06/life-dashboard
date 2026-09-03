@@ -3,6 +3,9 @@ node_modules/
 .pnp
 .pnp.js
 
+# Local env (Firebase config — never commit this)
+.env.local
+
 # Next.js build output
 .next/
 out/

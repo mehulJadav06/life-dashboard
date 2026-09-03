@@ -1,12 +1,18 @@
 'use client'
 
-import { LucideIcon, Rocket } from 'lucide-react'
+import { Rocket, CheckSquare, DollarSign, Calculator, BarChart2, Bookmark, FileText, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+type IconName = 'CheckSquare' | 'DollarSign' | 'Calculator' | 'BarChart2' | 'Bookmark' | 'FileText' | 'Settings'
+
+const ICONS: Record<IconName, React.FC<{ className?: string }>> = {
+  CheckSquare, DollarSign, Calculator, BarChart2, Bookmark, FileText, Settings,
+}
 
 interface ComingSoonProps {
   title: string
   description: string
-  icon: LucideIcon
+  icon: IconName
   accent?: 'blue' | 'green' | 'red' | 'yellow' | 'purple'
   features?: string[]
 }
@@ -20,9 +26,10 @@ const accentMap = {
 }
 
 export function ComingSoon({
-  title, description, icon: Icon, accent = 'blue', features = [],
+  title, description, icon, accent = 'blue', features = [],
 }: ComingSoonProps) {
-  const a = accentMap[accent]
+  const a   = accentMap[accent]
+  const Icon = ICONS[icon]
 
   return (
     <div className="animate-in flex flex-col items-center justify-center min-h-[60vh] text-center px-4">

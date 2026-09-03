@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { StoreProvider } from '@/lib/store'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -14,9 +14,14 @@ export const metadata: Metadata = {
     'Your all-in-one personal life dashboard: to-dos, finances, saved links, notes, and more.',
   keywords: ['personal dashboard', 'life os', 'productivity', 'finance tracker', 'todo list'],
   authors: [{ name: 'LifeOS' }],
-  viewport: 'width=device-width, initial-scale=1',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
   themeColor: '#0f1117',
 }
+
 
 export default function RootLayout({
   children,

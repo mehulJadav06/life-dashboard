@@ -1,15 +1,12 @@
 import type { Metadata } from 'next'
-import { DollarSign } from 'lucide-react'
 import { ComingSoon } from '@/components/ui/ComingSoon'
-
 export const metadata: Metadata = { title: 'Money Tracker' }
-
 export default function TransactionsPage() {
   return (
     <ComingSoon
       title="Money Tracker"
       description="Track your income and expenses. Understand your financial flow with beautiful charts."
-      icon={DollarSign}
+      icon="DollarSign"
       accent="green"
       features={[
         'Log income & expense transactions',

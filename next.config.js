@@ -1,0 +1,11 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '/life-dashboard',
+  images: {
+    unoptimized: true,
+  },
+  trailingSlash: true,
+}
+
+module.exports = nextConfig
